@@ -73,6 +73,20 @@ public class BuildMojo extends AbstractDockerMojo {
   @Parameter(property = "dockerfile.build.pullNewerImage", defaultValue = "true")
   private boolean pullNewerImage;
 
+  /**
+   * Return value of buildImage method, holding image id and digest.
+   */
+  private static class ImageInfo {
+
+    public ImageInfo(String imageId, String imageDigest) {
+      this.imageId = imageId;
+      this.imageDigest = imageDigest;
+    }
+
+    public String imageId;
+    public String imageDigest;
+  }
+
   @Override
   public void execute(DockerClient dockerClient)
       throws MojoExecutionException, MojoFailureException {
@@ -83,14 +97,18 @@ public class BuildMojo extends AbstractDockerMojo {
       return;
     }
 
-    final String imageId =
+    final ImageInfo info =
         buildImage(dockerClient, log, verbose, contextDirectory, repository, tag, pullNewerImage);
 
-    if (imageId == null) {
+    if (info.imageId == null) {
       log.warn("Docker build was successful, but no image was built");
     } else {
-      log.info(MessageFormat.format("Detected build of image with id {0}", imageId));
-      writeMetadata(Metadata.IMAGE_ID, imageId);
+      log.info(MessageFormat.format("Detected build of image with id {0}", info.imageId));
+      writeMetadata(Metadata.IMAGE_ID, info.imageId);
+    }
+
+    if (info.imageDigest != null) {
+      writeMetadata(Metadata.IMAGE_DIGEST, info.imageDigest);
     }
 
     // Do this after the build so that other goals don't use the tag if it doesn't exist
@@ -101,14 +119,14 @@ public class BuildMojo extends AbstractDockerMojo {
     writeMetadata(log);
 
     if (repository == null) {
-      log.info(MessageFormat.format("Successfully built {0}", imageId));
+      log.info(MessageFormat.format("Successfully built {0}", info.imageId));
     } else {
       log.info(MessageFormat.format("Successfully built {0}", formatImageName(repository, tag)));
     }
   }
 
-  @Nullable
-  static String buildImage(@Nonnull DockerClient dockerClient,
+  @Nonnull
+  static ImageInfo buildImage(@Nonnull DockerClient dockerClient,
                            @Nonnull Log log,
                            boolean verbose,
                            @Nonnull File contextDirectory,
@@ -151,7 +169,7 @@ public class BuildMojo extends AbstractDockerMojo {
     }
     log.info(""); // Spacing around build progress
 
-    return progressHandler.builtImageId();
+    return new ImageInfo(progressHandler.builtImageId(), progressHandler.builtImageDigest());
   }
 
 }

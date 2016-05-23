@@ -42,6 +42,7 @@ class LoggingProgressHandler implements ProgressHandler {
   private final Log log;
   private final boolean verbose;
   private String builtImageId;
+  private String builtImageDigest;
   private Map<String, String> imageStatuses = new HashMap<>();
 
   LoggingProgressHandler(Log log, boolean verbose) {
@@ -58,6 +59,11 @@ class LoggingProgressHandler implements ProgressHandler {
     return builtImageId;
   }
 
+  @Nullable
+  public String builtImageDigest() {
+    return builtImageDigest;
+  }
+
   @Override
   public void progress(ProgressMessage message) throws DockerException {
     if (message.error() != null) {
@@ -71,6 +77,11 @@ class LoggingProgressHandler implements ProgressHandler {
     String imageId = message.buildImageId();
     if (imageId != null) {
       builtImageId = imageId;
+    }
+
+    String imageDigest = message.digest();
+    if (imageDigest != null) {
+      builtImageDigest = imageDigest;
     }
   }
 
