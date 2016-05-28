@@ -19,3 +19,6 @@
  */
 File imageIdFile = new File(basedir, "target/test-classes/META-INF/docker/com.spotify.it/writes-test-classpath/image-id")
 assert imageIdFile.isFile()
+
+File imageDigestFile = new File(basedir, "target/test-classes/META-INF/docker/com.spotify.it/writes-test-classpath/image-digest")
+assert imageDigestFile.isFile()

@@ -20,6 +20,9 @@
 File imageIdFile = new File(basedir, "target/docker/image-id")
 assert imageIdFile.isFile()
 
+File imageDigestFile = new File(basedir, "target/docker/image-digest")
+assert imageDigestFile.isFile()
+
 File repositoryFile = new File(basedir, "target/docker/repository")
 assert repositoryFile.text == "test/build-into-tag\n"
 

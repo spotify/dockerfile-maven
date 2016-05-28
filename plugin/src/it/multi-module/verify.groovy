@@ -17,8 +17,11 @@
  * limitations under the License.
  * -\-\-
  */
-File imageIdFile = new File(basedir, "b/target/docker-info-deps/META-INF/docker/com.spotify.it/a/image-id")
+File imageIdFile = new File(basedir, ""b/target/docker-info-deps/META-INF/docker/com.spotify.it/a/image-id")
 assert imageIdFile.isFile()
+
+File imageDigestFile = new File(basedir, "b/target/docker-info-deps/META-INF/docker/com.spotify.it/a/image-digest")
+assert imageDigestFile.isFile()
 
 File repositoryFile = new File(basedir, "b/target/docker-info-deps/META-INF/docker/com.spotify.it/a/repository")
 assert repositoryFile.text == "test/multi-module-a\n"

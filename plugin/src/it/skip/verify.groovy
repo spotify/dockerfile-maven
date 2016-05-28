@@ -19,3 +19,6 @@
  */
 File imageIdFile = new File(basedir, "target/docker/image-id")
 assert !imageIdFile.exists()
+
+File imageDigestFile = new File(basedir, "target/docker/image-digest")
+assert !imageDigestFile.isFile()
