@@ -22,20 +22,18 @@ package com.spotify.plugin.dockerfile;
 
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerException;
-
+import java.io.File;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.MessageFormat;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @Mojo(name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true, threadSafe = true)
 public class BuildMojo extends AbstractDockerMojo {
@@ -73,6 +71,12 @@ public class BuildMojo extends AbstractDockerMojo {
   @Parameter(property = "dockerfile.build.pullNewerImage", defaultValue = "true")
   private boolean pullNewerImage;
 
+  /**
+   * Do not use cache when building the image.
+   */
+  @Parameter(property = "dockerfile.build.noCache", defaultValue = "false")
+  private boolean noCache;
+
   @Override
   public void execute(DockerClient dockerClient)
       throws MojoExecutionException, MojoFailureException {
@@ -84,7 +88,7 @@ public class BuildMojo extends AbstractDockerMojo {
     }
 
     final String imageId =
-        buildImage(dockerClient, log, verbose, contextDirectory, repository, tag, pullNewerImage);
+        buildImage(dockerClient, log, verbose, contextDirectory, repository, tag, pullNewerImage, noCache);
 
     if (imageId == null) {
       log.warn("Docker build was successful, but no image was built");
@@ -114,7 +118,8 @@ public class BuildMojo extends AbstractDockerMojo {
                            @Nonnull File contextDirectory,
                            @Nullable String repository,
                            @Nonnull String tag,
-                           boolean pullNewerImage)
+                           boolean pullNewerImage,
+                           boolean noCache)
       throws MojoExecutionException, MojoFailureException {
 
     log.info(MessageFormat.format("Building Docker context {0}", contextDirectory));
@@ -127,12 +132,16 @@ public class BuildMojo extends AbstractDockerMojo {
     }
 
     final LoggingProgressHandler progressHandler = new LoggingProgressHandler(log, verbose);
-    final DockerClient.BuildParam[] buildParameters;
+    final ArrayList<DockerClient.BuildParam> buildParameters = new ArrayList<>();
     if (pullNewerImage) {
-      buildParameters = new DockerClient.BuildParam[]{DockerClient.BuildParam.pullNewerImage()};
-    } else {
-      buildParameters = new DockerClient.BuildParam[]{};
+      buildParameters.add(DockerClient.BuildParam.pullNewerImage());
     }
+    if (noCache) {
+      buildParameters.add(DockerClient.BuildParam.noCache());
+    }
+
+    final DockerClient.BuildParam[] buildParametersArray =
+        buildParameters.toArray(new DockerClient.BuildParam[buildParameters.size()]);
 
     log.info(""); // Spacing around build progress
     try {
@@ -140,11 +149,11 @@ public class BuildMojo extends AbstractDockerMojo {
         final String name = formatImageName(repository, tag);
         log.info(MessageFormat.format("Image will be built as {0}", name));
         log.info(""); // Spacing around build progress
-        dockerClient.build(contextDirectory.toPath(), name, progressHandler, buildParameters);
+        dockerClient.build(contextDirectory.toPath(), name, progressHandler, buildParametersArray);
       } else {
         log.info("Image will be built without a name");
         log.info(""); // Spacing around build progress
-        dockerClient.build(contextDirectory.toPath(), progressHandler, buildParameters);
+        dockerClient.build(contextDirectory.toPath(), progressHandler, buildParametersArray);
       }
     } catch (DockerException | IOException | InterruptedException e) {
       throw new MojoExecutionException("Could not build image", e);
