@@ -2,7 +2,12 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.spotify</groupId>
+  <parent>
+    <groupId>com.spotify</groupId>
+    <artifactId>foss-root</artifactId>
+    <version>5</version>
+  </parent>
+
   <artifactId>dockerfile-maven</artifactId>
   <version>1.2.3-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -28,6 +33,18 @@
   </scm>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <configuration>
+            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            <violationSeverity>warning</violationSeverity>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
@@ -62,35 +79,6 @@
           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <version>1.8</version>
-        <configuration>
-          <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-          <licenseName>apache_v2</licenseName>
-          <organizationName>Spotify AB</organizationName>
-          <inceptionYear>2015</inceptionYear>
-          <encoding>UTF-8</encoding>
-          <failOnMissingHeader>true</failOnMissingHeader>
-          <failOnNotUptodateHeader>true</failOnNotUptodateHeader>
-          <processStartTag>-/-/-</processStartTag>
-          <processEndTag>-\-\-</processEndTag>
-          <sectionDelimiter>%%</sectionDelimiter>
-          <roots>
-            <root>${project.basedir}/src</root>
-          </roots>
-        </configuration>
-        <executions>
-          <execution>
-            <id>check-file-header</id>
-            <goals>
-              <goal>check-file-header</goal>
-            </goals>
-            <phase>process-sources</phase>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
