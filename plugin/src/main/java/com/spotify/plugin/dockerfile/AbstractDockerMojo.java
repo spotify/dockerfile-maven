@@ -20,13 +20,20 @@
 
 package com.spotify.plugin.dockerfile;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.io.Files;
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerCertificateException;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
-import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
@@ -41,14 +48,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public abstract class AbstractDockerMojo extends AbstractMojo {
 
@@ -78,25 +77,34 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   /**
    * Directory containing the generated Docker info JAR.
    */
-  @Parameter(defaultValue = "${project.build.directory}", property = "dockerfile.outputDirectory", required = true)
+  @Parameter(defaultValue = "${project.build.directory}",
+      property = "dockerfile.outputDirectory",
+      required = true)
   private File buildDirectory;
 
   /**
    * Directory where various Docker-related metadata fragments will be stored.
    */
-  @Parameter(defaultValue = "${project.build.directory}/docker", property = "dockerfile.dockerInfoDirectory", required = true)
+  @Parameter(defaultValue = "${project.build.directory}/docker",
+      property = "dockerfile.dockerInfoDirectory", required = true)
   protected File dockerInfoDirectory;
 
   /**
-   * Directory where test metadata will be written during build
+   * Directory where test metadata will be written during build.
    */
-  @Parameter(defaultValue = "${project.build.testOutputDirectory}", property = "dockerfile.testOutputDirectory", required = true)
+  @Parameter(defaultValue = "${project.build.testOutputDirectory}",
+      property = "dockerfile.testOutputDirectory",
+      required = true)
   protected File testOutputDirectory;
 
-  @Parameter(defaultValue = "300000" /* 5 minutes */, property = "dockerfile.readTimeoutMillis", required = true)
+  @Parameter(defaultValue = "300000" /* 5 minutes */,
+      property = "dockerfile.readTimeoutMillis",
+      required = true)
   protected long readTimeoutMillis;
 
-  @Parameter(defaultValue = "300000" /* 5 minutes */, property = "dockerfile.connectTimeoutMillis", required = true)
+  @Parameter(defaultValue = "300000" /* 5 minutes */,
+      property = "dockerfile.connectTimeoutMillis",
+      required = true)
   protected long connectTimeoutMillis;
 
   /**
@@ -227,6 +235,25 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     attachJar(jarFile);
   }
 
+  protected void writeMetadata(@Nonnull Metadata metadata, @Nonnull String value)
+      throws MojoExecutionException {
+    final File metadataFile = ensureMetadataFile(metadata);
+
+    final String oldValue = readMetadata(metadata);
+    if (Objects.equals(oldValue, value)) {
+      return;
+    }
+
+    try {
+      Files.write(value + "\n", metadataFile, Charsets.UTF_8);
+    } catch (IOException e) {
+      final String message =
+          MessageFormat.format("Could not write {0} file at {1}", metadata.getFriendlyName(),
+              metadataFile);
+      throw new MojoExecutionException(message, e);
+    }
+  }
+
   private void writeTestMetadata() throws MojoExecutionException {
     if (writeTestMetadata && dockerInfoDirectory.exists()) {
       final File testMetadataDir = new File(testOutputDirectory, getMetaSubdir());
@@ -324,25 +351,6 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     writeMetadata(Metadata.REPOSITORY, repository);
     writeMetadata(Metadata.TAG, tag);
     writeMetadata(Metadata.IMAGE_NAME, formatImageName(repository, tag));
-  }
-
-  protected void writeMetadata(@Nonnull Metadata metadata, @Nonnull String value)
-      throws MojoExecutionException {
-    final File metadataFile = ensureMetadataFile(metadata);
-
-    final String oldValue = readMetadata(metadata);
-    if (Objects.equals(oldValue, value)) {
-      return;
-    }
-
-    try {
-      Files.write(value + "\n", metadataFile, Charsets.UTF_8);
-    } catch (IOException e) {
-      final String message =
-          MessageFormat.format("Could not write {0} file at {1}", metadata.getFriendlyName(),
-                               metadataFile);
-      throw new MojoExecutionException(message, e);
-    }
   }
 
   @Nullable

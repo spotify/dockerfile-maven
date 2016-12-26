@@ -30,7 +30,10 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-@Mojo(name = "push", defaultPhase = LifecyclePhase.DEPLOY, requiresProject = true, threadSafe = true)
+@Mojo(name = "push",
+    defaultPhase = LifecyclePhase.DEPLOY,
+    requiresProject = true,
+    threadSafe = true)
 public class PushMojo extends AbstractDockerMojo {
 
   /**

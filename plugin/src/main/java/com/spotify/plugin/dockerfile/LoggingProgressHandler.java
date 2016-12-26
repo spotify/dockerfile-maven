@@ -20,14 +20,11 @@
 
 package com.spotify.plugin.dockerfile;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
 import com.spotify.docker.client.ProgressHandler;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.messages.ProgressMessage;
-
-import com.google.common.base.Objects;
-import com.google.common.base.Splitter;
-
-import org.apache.maven.plugin.logging.Log;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -35,6 +32,8 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.apache.maven.plugin.logging.Log;
 
 class LoggingProgressHandler implements ProgressHandler {
 
