@@ -77,7 +77,7 @@
     <dependency>
       <groupId>com.spotify</groupId>
       <artifactId>helios-testing</artifactId>
-      <version>0.8.759</version>
+      <version>0.9.71</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
