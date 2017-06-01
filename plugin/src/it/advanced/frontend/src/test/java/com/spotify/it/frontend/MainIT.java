@@ -26,6 +26,7 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.google.common.net.HostAndPort;
 
+import com.spotify.helios.common.descriptors.HealthCheck;
 import com.spotify.helios.testing.HeliosDeploymentResource;
 import com.spotify.helios.testing.HeliosSoloDeployment;
 import com.spotify.helios.testing.TemporaryJob;
@@ -76,6 +77,11 @@ public class MainIT {
             Resources.getResource("META-INF/docker/com.spotify.it/backend/image-name"),
             Charsets.UTF_8).trim())
         .port("http", 1337)
+        .healthCheck(HealthCheck.newHttpHealthCheck()
+            .setPath("/api/version")
+            .setPort("http")
+            .build()
+        )
         .deploy();
     HostAndPort backendAddress = backendJob.address("http");
     backend = httpUri(backendAddress);
@@ -85,6 +91,11 @@ public class MainIT {
                                    Charsets.UTF_8))
         .command(backend.toString())
         .port("http", 1338)
+        .healthCheck(HealthCheck.newHttpHealthCheck()
+            .setPath("/")
+            .setPort("http")
+            .build()
+        )
         .deploy();
     HostAndPort frontendAddress = frontendJob.address("http");
     frontend = httpUri(frontendAddress);
