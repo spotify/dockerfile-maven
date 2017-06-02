@@ -183,3 +183,20 @@ service-b:
 
 Now, `docker-compose up` and `docker-compose build` will work as
 expected.
+
+## Authentication and private Docker registry support
+
+Since version 1.3.0, the plugin will automatically use any configuration in
+your `~/.dockercfg` or `~/.docker/config.json` file when pulling, pushing, or
+building images to private registries.
+
+Additionally the plugin will enable support for Google Container Registry if it
+is able to successfully load [Google's "Application Default Credentials"][ADC].
+The plugin will also load Google credentials from the file pointed to by the
+environment variable `DOCKER_GOOGLE_CREDENTIALS` if it is defined. Since GCR
+authentication requires retrieving short-lived access codes for the given
+credentials, support for this registry is baked into the underlying
+docker-client rather than having to first populate the docker config file
+before running the plugin.
+
+[ADC]: https://developers.google.com/identity/protocols/application-default-credentials
