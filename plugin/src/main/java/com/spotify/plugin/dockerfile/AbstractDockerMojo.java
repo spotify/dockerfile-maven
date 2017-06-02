@@ -20,24 +20,25 @@
 
 package com.spotify.plugin.dockerfile;
 
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.auth.ConfigFileRegistryAuthSupplier;
+import com.spotify.docker.client.auth.MultiRegistryAuthSupplier;
+import com.spotify.docker.client.auth.RegistryAuthSupplier;
+import com.spotify.docker.client.auth.gcr.ContainerRegistryAuthSupplier;
 import com.spotify.docker.client.exceptions.DockerCertificateException;
-
-import com.spotify.docker.client.gcr.ContainerRegistryAuthSupplier;
-import com.spotify.docker.client.messages.RegistryAuthSupplier;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
-import java.util.concurrent.ExecutorService;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.execution.MavenSession;
@@ -380,16 +381,8 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   }
 
   @Nonnull
-  protected DockerClient openDockerClient() throws MojoExecutionException {
-    ContainerRegistryAuthSupplier authSupplier = null;
-    try {
-      authSupplier = ContainerRegistryAuthSupplier.forApplicationDefaultCredentials()
-          .build();
-      getLog().info("Using Google application credentials");
-    } catch (IOException ex) {
-      // No GCP default credentials available
-      getLog().debug("Failed to create Google default credentials", ex);
-    }
+  private DockerClient openDockerClient() throws MojoExecutionException {
+    final RegistryAuthSupplier authSupplier = createRegistryAuthSupplier();
 
     try {
       return DefaultDockerClient.fromEnv()
@@ -401,4 +394,39 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
       throw new MojoExecutionException("Could not load Docker certificates", e);
     }
   }
+
+  @Nonnull
+  private RegistryAuthSupplier createRegistryAuthSupplier() {
+    final List<RegistryAuthSupplier> suppliers = new ArrayList<>();
+    suppliers.add(new ConfigFileRegistryAuthSupplier());
+
+    try {
+      final RegistryAuthSupplier googleSupplier = googleContainerRegistryAuthSupplier();
+      if (googleSupplier != null) {
+        suppliers.add(0, googleSupplier);
+      }
+    } catch (IOException ex) {
+      getLog().info("ignoring exception while loading Google credentials", ex);
+    }
+
+    return new MultiRegistryAuthSupplier(suppliers);
+  }
+
+  @Nullable
+  private RegistryAuthSupplier googleContainerRegistryAuthSupplier() throws IOException {
+    GoogleCredentials credentials = null;
+    try {
+      credentials = GoogleCredentials.getApplicationDefault();
+      getLog().info("Using Google application default credentials");
+    } catch (IOException ex) {
+      // No GCP default credentials available
+      getLog().debug("Failed to create Google application default credentials", ex);
+    }
+
+    if (credentials == null) {
+      return null;
+    }
+    return ContainerRegistryAuthSupplier.forCredentials(credentials).build();
+  }
+
 }
