@@ -27,11 +27,14 @@ import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerCertificateException;
 
+import com.spotify.docker.client.gcr.ContainerRegistryAuthSupplier;
+import com.spotify.docker.client.messages.RegistryAuthSupplier;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Objects;
 
+import java.util.concurrent.ExecutorService;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -378,10 +381,21 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
 
   @Nonnull
   protected DockerClient openDockerClient() throws MojoExecutionException {
+    ContainerRegistryAuthSupplier authSupplier = null;
+    try {
+      authSupplier = ContainerRegistryAuthSupplier.forApplicationDefaultCredentials()
+          .build();
+      getLog().info("Using Google application credentials");
+    } catch (IOException ex) {
+      // No GCP default credentials available
+      getLog().debug("Failed to create Google default credentials", ex);
+    }
+
     try {
       return DefaultDockerClient.fromEnv()
           .readTimeoutMillis(readTimeoutMillis)
           .connectTimeoutMillis(connectTimeoutMillis)
+          .registryAuthSupplier(authSupplier)
           .build();
     } catch (DockerCertificateException e) {
       throw new MojoExecutionException("Could not load Docker certificates", e);
