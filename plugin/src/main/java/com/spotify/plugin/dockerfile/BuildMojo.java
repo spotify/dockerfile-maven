@@ -20,12 +20,16 @@
 
 package com.spotify.plugin.dockerfile;
 
+import com.google.gson.Gson;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerException;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -82,6 +86,12 @@ public class BuildMojo extends AbstractDockerMojo {
   @Parameter(property = "dockerfile.build.noCache", defaultValue = "false")
   private boolean noCache;
 
+  /**
+   * Custom build arguments
+   */
+  @Parameter(property = "dockerfile.buildArgs")
+  private Map<String,String> buildArgs;
+
   @Override
   public void execute(DockerClient dockerClient)
       throws MojoExecutionException, MojoFailureException {
@@ -93,7 +103,7 @@ public class BuildMojo extends AbstractDockerMojo {
     }
 
     final String imageId = buildImage(
-        dockerClient, log, verbose, contextDirectory, repository, tag, pullNewerImage, noCache);
+        dockerClient, log, verbose, contextDirectory, repository, tag, pullNewerImage, noCache, buildArgs);
 
     if (imageId == null) {
       log.warn("Docker build was successful, but no image was built");
@@ -124,7 +134,8 @@ public class BuildMojo extends AbstractDockerMojo {
                            @Nullable String repository,
                            @Nonnull String tag,
                            boolean pullNewerImage,
-                           boolean noCache)
+                           boolean noCache,
+                           @Nullable Map<String,String> buildArgs)
       throws MojoExecutionException, MojoFailureException {
 
     log.info(MessageFormat.format("Building Docker context {0}", contextDirectory));
@@ -143,6 +154,15 @@ public class BuildMojo extends AbstractDockerMojo {
     }
     if (noCache) {
       buildParameters.add(DockerClient.BuildParam.noCache());
+    }
+
+    if (buildArgs != null && !buildArgs.isEmpty()) {
+      try {
+        final String encodedBuildArgs = URLEncoder.encode(new Gson().toJson(buildArgs), "utf-8");
+        buildParameters.add(new DockerClient.BuildParam("buildargs", encodedBuildArgs));
+      } catch (UnsupportedEncodingException e) {
+         throw new MojoExecutionException("Could not build image", e);
+      }
     }
 
     final DockerClient.BuildParam[] buildParametersArray =
