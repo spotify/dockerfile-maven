@@ -192,6 +192,12 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   private JarArchiver jarArchiver;
 
   /**
+   * Allows enabling/disabling gcr credentials
+   */
+  @Parameter(defaultValue = "true", property = "dockerfile.googleregistry")
+  private boolean googleregistry;
+
+  /**
    * The Maven project helper.
    */
   @Component
@@ -401,13 +407,15 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     final List<RegistryAuthSupplier> suppliers = new ArrayList<>();
     suppliers.add(new ConfigFileRegistryAuthSupplier());
 
-    try {
-      final RegistryAuthSupplier googleSupplier = googleContainerRegistryAuthSupplier();
-      if (googleSupplier != null) {
-        suppliers.add(0, googleSupplier);
-      }
-    } catch (IOException ex) {
-      getLog().info("ignoring exception while loading Google credentials", ex);
+    if ( googleregistry ){
+       try {
+         final RegistryAuthSupplier googleSupplier = googleContainerRegistryAuthSupplier();
+         if (googleSupplier != null) {
+           suppliers.add(0, googleSupplier);
+         }
+       } catch (IOException ex) {
+         getLog().info("ignoring exception while loading Google credentials", ex);
+       }
     }
 
     return new MultiRegistryAuthSupplier(suppliers);
