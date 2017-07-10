@@ -197,7 +197,7 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
    * can be explicitly disabled with this property if needed.
    */
   @Parameter(defaultValue = "true", property = "dockerfile.googleContainerRegistryEnabled")
-  private boolean googleContainerRegistryEnabled = true;
+  private boolean googleContainerRegistryEnabled;
 
   /**
    * The Maven project helper.
@@ -409,15 +409,15 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     final List<RegistryAuthSupplier> suppliers = new ArrayList<>();
     suppliers.add(new ConfigFileRegistryAuthSupplier());
 
-    if (googleContainerRegistryEnabled){
-       try {
-         final RegistryAuthSupplier googleSupplier = googleContainerRegistryAuthSupplier();
-         if (googleSupplier != null) {
-           suppliers.add(0, googleSupplier);
-         }
-       } catch (IOException ex) {
-         getLog().info("ignoring exception while loading Google credentials", ex);
-       }
+    if (googleContainerRegistryEnabled) {
+      try {
+        final RegistryAuthSupplier googleSupplier = googleContainerRegistryAuthSupplier();
+        if (googleSupplier != null) {
+          suppliers.add(0, googleSupplier);
+        }
+      } catch (IOException ex) {
+        getLog().info("Ignoring exception while loading Google credentials", ex);
+      }
     } else {
       getLog().info("Google Container Registry support is disabled");
     }
