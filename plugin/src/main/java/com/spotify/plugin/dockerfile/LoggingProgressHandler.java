@@ -63,7 +63,7 @@ class LoggingProgressHandler implements ProgressHandler {
       handleError(message.error());
     } else if (message.progressDetail() != null) {
       handleProgress(message.id(), message.status(), message.progress());
-    } else if (message.status() != null) {
+    } else if ((message.status() != null) || (message.stream() != null)) {
       handleGeneric(message.stream(), message.status());
     }
 
