@@ -68,6 +68,9 @@ public class BuildMojo extends AbstractDockerMojo {
   @Parameter(property = "dockerfile.tag", defaultValue = "latest")
   private String tag;
 
+  @Parameter(property = "dockerfile.tagSnapshotAsLatest", defaultValue = "false")
+  private boolean tagSnapshotAsLatest;
+
   /**
    * Disables the build goal; it becomes a no-op.
    */
@@ -100,6 +103,11 @@ public class BuildMojo extends AbstractDockerMojo {
     if (skipBuild) {
       log.info("Skipping execution because 'dockerfile.build.skip' is set");
       return;
+    }
+
+    if ( tagSnapshotAsLatest ) {
+      tag = tag.endsWith("-SNAPSHOT") ? "latest" : tag;
+      log.info(MessageFormat.format("Setting tag to: {0}", tag));
     }
 
     final String imageId = buildImage(
