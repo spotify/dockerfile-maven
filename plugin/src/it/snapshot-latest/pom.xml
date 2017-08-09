@@ -46,7 +46,7 @@
               <goal>build</goal>
             </goals>
             <configuration>
-              <repository>test/build-into-tag</repository>
+              <repository>test/snapshot-latest</repository>
               <tag>${project.version}</tag>
               <tagSnapshotAsLatest>true</tagSnapshotAsLatest>
             </configuration>
