@@ -27,7 +27,7 @@
   <artifactId>snapshot-latest</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <description>The Dockerfile is built into a repository with a a tag based on version as 'latest'</description>
+  <description>The Dockerfile is built into a repository with a tag based on a snapshot version as 'latest'</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
