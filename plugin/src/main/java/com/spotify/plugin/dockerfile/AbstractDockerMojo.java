@@ -32,6 +32,15 @@ import com.spotify.docker.client.auth.MultiRegistryAuthSupplier;
 import com.spotify.docker.client.auth.RegistryAuthSupplier;
 import com.spotify.docker.client.auth.gcr.ContainerRegistryAuthSupplier;
 import com.spotify.docker.client.exceptions.DockerCertificateException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.execution.MavenSession;
@@ -45,16 +54,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 public abstract class AbstractDockerMojo extends AbstractMojo {
 
@@ -103,7 +102,7 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   protected File dockerConfigFile;
 
   /**
-   * A maven server id, in order to use maven settings to supply server auth
+   * A maven server id, in order to use maven settings to supply server auth.
    */
   @Parameter(defaultValue = "false", property = "dockerfile.useMavenSettingsForAuth")
   protected boolean useMavenSettingsForAuth;
@@ -429,7 +428,12 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     if (dockerConfigFile == null || "".equals(dockerConfigFile.getName())) {
       suppliers.add(new ConfigFileRegistryAuthSupplier());
     } else {
-      suppliers.add(new ConfigFileRegistryAuthSupplier(new DockerConfigReader(), dockerConfigFile.toPath()));
+      suppliers.add(
+          new ConfigFileRegistryAuthSupplier(
+            new DockerConfigReader(),
+            dockerConfigFile.toPath()
+          )
+      );
     }
 
     if (googleContainerRegistryEnabled) {

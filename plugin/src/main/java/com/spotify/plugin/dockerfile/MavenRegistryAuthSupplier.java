@@ -25,11 +25,10 @@ import com.spotify.docker.client.auth.RegistryAuthSupplier;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.messages.RegistryAuth;
 import com.spotify.docker.client.messages.RegistryConfigs;
-import org.apache.maven.settings.Server;
-import org.apache.maven.settings.Settings;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.maven.settings.Server;
+import org.apache.maven.settings.Settings;
 
 public class MavenRegistryAuthSupplier implements RegistryAuthSupplier {
 
@@ -62,11 +61,11 @@ public class MavenRegistryAuthSupplier implements RegistryAuthSupplier {
     final Map<String, RegistryAuth> allConfigs = new HashMap<>();
     for (Server server : settings.getServers()) {
       allConfigs.put(
-        server.getId(),
-        RegistryAuth.builder()
-          .username(server.getUsername())
-          .password(server.getPassword())
-          .build()
+          server.getId(),
+          RegistryAuth.builder()
+            .username(server.getUsername())
+            .password(server.getPassword())
+            .build()
       );
     }
     return RegistryConfigs.create(allConfigs);
