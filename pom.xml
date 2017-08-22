@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>dockerfile-maven</artifactId>
-  <version>1.3.5</version>
+  <version>1.3.6-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Dockerfile Maven Support</name>
@@ -28,7 +28,7 @@
   <scm>
     <connection>scm:git:ssh://git@github.com/spotify/dockerfile-maven.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/spotify/dockerfile-maven.git</developerConnection>
-    <tag>v1.3.5</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/spotify/dockerfile-maven</url>
   </scm>
 

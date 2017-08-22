@@ -5,7 +5,7 @@
   <parent>
     <artifactId>dockerfile-maven</artifactId>
     <groupId>com.spotify</groupId>
-    <version>1.3.5</version>
+    <version>1.3.6-SNAPSHOT</version>
   </parent>
 
   <artifactId>dockerfile-maven-extension</artifactId>
