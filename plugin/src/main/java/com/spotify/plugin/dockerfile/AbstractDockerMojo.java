@@ -103,6 +103,12 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   protected File dockerConfigFile;
 
   /**
+   * A maven server id, in order to use maven settings to supply server auth
+   */
+  @Parameter(defaultValue = "false", property = "dockerfile.useMavenSettingsForAuth")
+  protected boolean useMavenSettingsForAuth;
+
+  /**
    * Directory where test metadata will be written during build.
    */
   @Parameter(defaultValue = "${project.build.testOutputDirectory}",
@@ -415,6 +421,11 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   @Nonnull
   private RegistryAuthSupplier createRegistryAuthSupplier() {
     final List<RegistryAuthSupplier> suppliers = new ArrayList<>();
+
+    if (useMavenSettingsForAuth) {
+      suppliers.add(new MavenRegistryAuthSupplier(session.getSettings()));
+    }
+
     if (dockerConfigFile == null || "".equals(dockerConfigFile.getName())) {
       suppliers.add(new ConfigFileRegistryAuthSupplier());
     } else {
