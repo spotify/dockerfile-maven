@@ -28,6 +28,9 @@ import com.spotify.docker.client.messages.RegistryConfigs;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MavenRegistryAuthSupplier implements RegistryAuthSupplier {
 
   private final Settings settings;
@@ -56,7 +59,17 @@ public class MavenRegistryAuthSupplier implements RegistryAuthSupplier {
 
   @Override
   public RegistryConfigs authForBuild() throws DockerException {
-    return null;
+    final Map<String, RegistryAuth> allConfigs = new HashMap<>();
+    for (Server server : settings.getServers()) {
+      allConfigs.put(
+        server.getId(),
+        RegistryAuth.builder()
+          .username(server.getUsername())
+          .password(server.getPassword())
+          .build()
+      );
+    }
+    return RegistryConfigs.create(allConfigs);
   }
-  
+
 }
