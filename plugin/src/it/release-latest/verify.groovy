@@ -21,10 +21,14 @@ File imageIdFile = new File(basedir, "target/docker/image-id")
 assert imageIdFile.isFile()
 
 File repositoryFile = new File(basedir, "target/docker/repository")
-assert repositoryFile.text == "test/snapshot-latest\n"
+assert repositoryFile.text == "test/release-latest\n"
 
 File tagFile = new File(basedir, "target/docker/tag")
-assert tagFile.text == "unstable\n"
+assert tagFile.text == "1.0\n"
+
+File alternativeTagFile = new File(basedir, "target/docker/alternative-tag")
+assert alternativeTagFile.isFile();
+assert alternativeTagFile.text == "latest\n"
 
 File imageNameFile = new File(basedir, "target/docker/image-name")
-assert imageNameFile.text == "test/snapshot-latest:unstable\n"
+assert imageNameFile.text == "test/release-latest:1.0\n"

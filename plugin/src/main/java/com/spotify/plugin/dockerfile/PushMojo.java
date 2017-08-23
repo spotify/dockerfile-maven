@@ -89,5 +89,15 @@ public class PushMojo extends AbstractDockerMojo {
     } catch (DockerException | InterruptedException e) {
       throw new MojoExecutionException("Could not push image", e);
     }
+
+    final String alternativeTag = readMetadata(Metadata.ALTERNATIVE_TAG);
+    if ( alternativeTag != null ) {
+      try {
+        dockerClient.push(formatImageName(repository, alternativeTag),
+                          LoggingProgressHandler.forLog(log, verbose));
+      } catch (DockerException | InterruptedException e) {
+        throw new MojoExecutionException("Could not push image", e);
+      }
+    }
   }
 }

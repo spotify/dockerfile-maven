@@ -24,10 +24,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.spotify.it</groupId>
-  <artifactId>snapshot-latest</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>release-latest</artifactId>
+  <version>1.0</version>
 
-  <description>The Dockerfile is built into a repository with a tag based on a snapshot version as 'unstable'</description>
+  <description>The Dockerfile is built into a repository with a tag based on a snapshot version as 'latest'</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,9 +46,9 @@
               <goal>build</goal>
             </goals>
             <configuration>
-              <repository>test/snapshot-latest</repository>
+              <repository>test/release-latest</repository>
               <tag>${project.version}</tag>
-              <snapShotTag>unstable</snapShotTag>
+              <tagReleaseAsLatest>true</tagReleaseAsLatest>
             </configuration>
           </execution>
         </executions>
