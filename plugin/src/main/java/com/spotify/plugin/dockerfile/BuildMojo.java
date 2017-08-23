@@ -69,6 +69,18 @@ public class BuildMojo extends AbstractDockerMojo {
   private String tag;
 
   /**
+   * What to tag snapshots as default {@code latest}.
+   */
+  @Parameter(property = "dockerfile.snapShotTag")
+  private String snapShotTag;
+
+  /**
+   * Tag releases as latest.
+   */
+  @Parameter(property = "dockerfile.tagReleaseAsLatest", defaultValue = "false")
+  private boolean tagReleaseAsLatest;
+
+  /**
    * Disables the build goal; it becomes a no-op.
    */
   @Parameter(property = "dockerfile.build.skip", defaultValue = "false")
@@ -102,9 +114,26 @@ public class BuildMojo extends AbstractDockerMojo {
       return;
     }
 
+    // Is the tag a SNAPSHOT maven version
+    boolean isSnapshot = tag.endsWith("-SNAPSHOT");
+
+    // default is null
+    String alternativeTag = null;
+
+    if ( !isSnapshot && tagReleaseAsLatest && tag.equals(project.getVersion()) ) {
+      alternativeTag = "latest";
+      log.info(MessageFormat.format(
+          "Image is a RELEASE and will be additionally tagged as: {0}", alternativeTag));
+    }
+
+    if ( isSnapshot && tag.equals(project.getVersion()) && !snapShotTag.isEmpty()) {
+      tag = snapShotTag;
+      log.info(MessageFormat.format("Image is a SNAPSHOT and will be tagged as: {0}", tag));
+    }
+
     final String imageId = buildImage(
-        dockerClient, log, verbose, contextDirectory, repository, tag, pullNewerImage, noCache,
-        buildArgs);
+        dockerClient, log, verbose, contextDirectory, repository, tag,  alternativeTag,
+        pullNewerImage, noCache, buildArgs);
 
     if (imageId == null) {
       log.warn("Docker build was successful, but no image was built");
@@ -116,6 +145,10 @@ public class BuildMojo extends AbstractDockerMojo {
     // Do this after the build so that other goals don't use the tag if it doesn't exist
     if (repository != null) {
       writeImageInfo(repository, tag);
+    }
+
+    if ( alternativeTag != null ) {
+      writeMetadata(Metadata.ALTERNATIVE_TAG, alternativeTag);
     }
 
     writeMetadata(log);
@@ -134,6 +167,7 @@ public class BuildMojo extends AbstractDockerMojo {
                            @Nonnull File contextDirectory,
                            @Nullable String repository,
                            @Nonnull String tag,
+                           @Nullable String alternativeTag,
                            boolean pullNewerImage,
                            boolean noCache,
                            @Nullable Map<String,String> buildArgs)
@@ -176,6 +210,12 @@ public class BuildMojo extends AbstractDockerMojo {
         log.info(MessageFormat.format("Image will be built as {0}", name));
         log.info(""); // Spacing around build progress
         dockerClient.build(contextDirectory.toPath(), name, progressHandler, buildParametersArray);
+        if (alternativeTag != null) {
+          final String alternativeName = formatImageName(repository, alternativeTag);
+          log.info(MessageFormat.format("Image will be additionally tagged as {0}",
+                                        alternativeName));
+          dockerClient.tag(name, alternativeName);
+        }
       } else {
         log.info("Image will be built without a name");
         log.info(""); // Spacing around build progress

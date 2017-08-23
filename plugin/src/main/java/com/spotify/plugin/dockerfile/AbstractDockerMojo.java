@@ -60,7 +60,8 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     IMAGE_ID("image ID", "image-id"),
     REPOSITORY("repository", "repository"),
     TAG("tag", "tag"),
-    IMAGE_NAME("image name", "image-name");
+    IMAGE_NAME("image name", "image-name"),
+    ALTERNATIVE_TAG("alternative tag", "alternative-tag");
 
     private final String friendlyName;
     private final String fileName;
