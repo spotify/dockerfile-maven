@@ -29,8 +29,12 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MavenRegistryAuthSupplier implements RegistryAuthSupplier {
+
+  private static final Logger log = LoggerFactory.getLogger(MavenRegistryAuthSupplier.class);
 
   private final Settings settings;
 
@@ -48,6 +52,7 @@ public class MavenRegistryAuthSupplier implements RegistryAuthSupplier {
         .password(server.getPassword())
         .build();
     }
+    log.warn("Did not find maven server configuration for docker server " + ref.getRegistryName());
     return null;
   }
 
