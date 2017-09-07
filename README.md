@@ -203,3 +203,32 @@ docker-client rather than having to first populate the docker config file
 before running the plugin.
 
 [ADC]: https://developers.google.com/identity/protocols/application-default-credentials
+
+## Authenticating with maven settings.xml
+
+Since version 1.3.6, you can authenticate using your maven settings.xml instead
+of docker configuration.  Just add configuration similar to:
+
+```xml
+<configuration>
+  <repository>docker-repo.example.com:8080/organization/image</repository>
+  <tag>latest</tag>
+  <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+</configuration>
+```
+
+You can also use `-Ddockerfile.useMavenSettingsForAuth=true` on the command line.
+
+Then, in your maven settings file, add configuration for the server:
+
+```xml
+<servers>
+  <server>
+    <id>docker-repo.example.com:8080</id>
+    <username>me</username>
+    <password>mypassword</password>
+  </server>
+</servers>
+```
+
+exactly as you would for any other server configuration.

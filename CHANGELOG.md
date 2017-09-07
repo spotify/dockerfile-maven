@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.6 (unreleased)
+
+- Add support for using maven settings.xml file to provide docker authorization ([65][])
+
+[65]: https://github.com/spotify/dockerfile-maven/pull/65
+
 ## 1.3.3 (released July 11 2017)
 
 - Add support for supplying build-args (`ARG` in Dockerfile) in pom.xml with
