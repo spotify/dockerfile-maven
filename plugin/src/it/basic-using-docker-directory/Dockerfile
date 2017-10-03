@@ -1,4 +1,8 @@
 FROM scratch
 MAINTAINER David Flemström <dflemstr@spotify.com>
 
-COPY target/docker/lib
+ENV BASE /opt/base
+
+COPY target/docker/lib $BASE/lib
+
+ADD src/main/docker/foo.txt $BASE/
