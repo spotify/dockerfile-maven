@@ -293,10 +293,19 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
       for (String name : dockerInfoDirectory.list()) {
         final File sourceFile = new File(dockerInfoDirectory, name);
         final File targetFile = new File(testMetadataDir, name);
-        try {
-          Files.copy(sourceFile, targetFile);
-        } catch (IOException e) {
-          throw new MojoExecutionException("Could not copy files", e);
+        if (sourceFile.isDirectory()) {
+          getLog().warn("A directory was found inside the docker info directory at "
+              + dockerInfoDirectory.getAbsolutePath()
+              + " - this usually indicates that you have used this directory for something other"
+              + " than this plugin. "
+              + "For proper functionality, please configure the `dockerfile.dockerInfoDirectory`"
+              + " property to something that is only used by this plugin.");
+        } else {
+          try {
+            Files.copy(sourceFile, targetFile);
+          } catch (IOException e) {
+            throw new MojoExecutionException("Could not copy files", e);
+          }
         }
       }
     }
