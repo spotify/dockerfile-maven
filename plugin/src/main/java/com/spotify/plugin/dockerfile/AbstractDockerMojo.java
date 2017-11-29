@@ -134,6 +134,12 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   @Parameter(defaultValue = "1", property = "dockerfile.retryCount")
   protected int retryCount;
 
+  @Parameter(property = "dockerfile.username")
+  protected String username;
+
+  @Parameter(property = "dockerfile.password")
+  protected String password;
+
   /**
    * Whether to output a verbose log when performing various operations.
    */
@@ -435,7 +441,6 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
           )
       );
     }
-
     if (googleContainerRegistryEnabled) {
       try {
         final RegistryAuthSupplier googleSupplier = googleContainerRegistryAuthSupplier();
@@ -447,6 +452,11 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
       }
     } else {
       getLog().info("Google Container Registry support is disabled");
+    }
+
+    MavenPomAuthSupplier pomSupplier = new MavenPomAuthSupplier(this.username, this.password);
+    if (pomSupplier.hasUserName()) {
+      suppliers.add(pomSupplier);
     }
 
     return new MultiRegistryAuthSupplier(suppliers);

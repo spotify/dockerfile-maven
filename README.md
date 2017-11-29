@@ -237,6 +237,46 @@ Then, in your maven settings file, add configuration for the server:
 
 exactly as you would for any other server configuration.
 
+## Authenticating with maven pom.xml
+
+Since version 1.3.XX, you can authenticate using config from the pom itself.
+Just add configuration similar to:
+
+```xml
+ <plugin>
+    <groupId>com.spotify</groupId>
+    <artifactId>dockerfile-maven-plugin</artifactId>
+    <version>${version}</version>
+    <configuration>
+        <username>repoUserName</username>
+        <password>repoPassword</password>
+        <repository>${docker.image.prefix}/${project.artifactId}</repository>
+        <buildArgs>
+            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+        </buildArgs>
+    </configuration>
+</plugin>
+```
+or simpler, 
+```xml
+ <plugin>
+    <groupId>com.spotify</groupId>
+    <artifactId>dockerfile-maven-plugin</artifactId>
+    <version>${version}</version>
+    <configuration>
+        <repository>${docker.image.prefix}/${project.artifactId}</repository>
+        <buildArgs>
+            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+        </buildArgs>
+    </configuration>
+</plugin>
+```
+
+with this command line call
+
+    mvn goal -DDockerfile.username=... -Ddockerfile.password=...
+    
+
 ## Skip Docker Goals Bound to Maven Phases
 
 You can pass options to maven to disable the docker goals.
