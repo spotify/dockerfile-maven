@@ -56,7 +56,7 @@ package` and push it with `mvn deploy`.  Of course you can also say
 <plugin>
   <groupId>com.spotify</groupId>
   <artifactId>dockerfile-maven-plugin</artifactId>
-  <version>${version}</version>
+  <version>${dockerfile-maven-version}</version>
   <executions>
     <execution>
       <id>default</id>
