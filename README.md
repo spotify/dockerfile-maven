@@ -79,7 +79,7 @@ package` and push it with `mvn deploy`.  Of course you can also say
 A corresponding `Dockerfile` could look like:
 
 ```
-FROM dockerfile/java:oracle-java8
+FROM java:8
 MAINTAINER David Flemström <dflemstr@spotify.com>
 
 ENTRYPOINT ["/usr/bin/java", "-jar", "/usr/share/myservice/myservice.jar"]
