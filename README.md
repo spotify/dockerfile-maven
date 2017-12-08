@@ -56,7 +56,7 @@ package` and push it with `mvn deploy`.  Of course you can also say
 <plugin>
   <groupId>com.spotify</groupId>
   <artifactId>dockerfile-maven-plugin</artifactId>
-  <version>${version}</version>
+  <version>${dockerfile-maven-version}</version>
   <executions>
     <execution>
       <id>default</id>
@@ -79,7 +79,7 @@ package` and push it with `mvn deploy`.  Of course you can also say
 A corresponding `Dockerfile` could look like:
 
 ```
-FROM dockerfile/java:oracle-java8
+FROM openjdk:8-jre
 MAINTAINER David Flemström <dflemstr@spotify.com>
 
 ENTRYPOINT ["/usr/bin/java", "-jar", "/usr/share/myservice/myservice.jar"]
