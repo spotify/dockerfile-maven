@@ -107,9 +107,9 @@ which also greatly speeds up builds.
 You no longer have to say something like:
 
     mvn package
-    mvn docker:build
+    mvn dockerfile:build
     mvn verify
-    mvn docker:push
+    mvn dockerfile:push
     mvn deploy
 
 Instead, it is simply enough to say:
