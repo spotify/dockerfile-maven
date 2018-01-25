@@ -15,7 +15,7 @@
   <description>Adds support for building Dockerfiles in Maven</description>
 
   <properties>
-    <docker-client.version>8.8.1</docker-client.version>
+    <docker-client.version>8.10.1</docker-client.version>
   </properties>
 
   <dependencyManagement>
@@ -43,7 +43,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>19.0</version>
+      <version>20.0</version>
     </dependency>
     <dependency>
       <groupId>com.spotify</groupId>
