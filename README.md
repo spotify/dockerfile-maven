@@ -159,6 +159,31 @@ parent POM) in order for the `docker-info` type to be supported:
 </build>
 ```
 
+### Clean images from Docker host after the build
+
+You can use the `rmi` goal (from `docker rmi`, a.k.a. `docker image
+remove`) to clean up the project's image on the Docker host, so that
+the storage on the host doesn't fill up. This is especially useful if
+you deploy tagged images to a Docker registry from a build host where
+you don't need the image anymore after the build. As with `docker
+rmi`, the `dockerfile.rmi.force` option must be set to `true` when
+removing tagged images.
+
+Set up the configuration like this to have Docker images cleaned when
+executing `mvn clean`:
+
+```xml
+<execution>
+  <id>clean</id>
+  <goals>
+    <goal>rmi</goal>
+  </goals>
+  <configuration>
+    <forceRemove>true</forceRemove>
+  </configuration>
+</execution>
+```
+
 ## Use other Docker tools that rely on Dockerfiles
 
 Your project(s) look like so:
@@ -287,6 +312,7 @@ You can pass options to maven to disable the docker goals.
 | dockerfile.build.skip | Disables the build goal; it becomes a no-op. |
 | dockerfile.tag.skip | Disables the tag goal; it becomes a no-op. |
 | dockerfile.push.skip | Disables the push goal; it becomes a no-op. |
+| dockerfile.rmi.skip | Disables the rmi goal; it becomes a no-op. |
 
 For example to skip the entire dockerfile plugin:
 ```
