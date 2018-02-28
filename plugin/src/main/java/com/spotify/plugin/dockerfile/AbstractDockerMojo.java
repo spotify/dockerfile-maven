@@ -139,7 +139,7 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   /**
    * Whether to connect to Docker Daemon using HTTP proxy, if set.
    */
-  @Parameter(defaultValue = "false", property = "dockerfile.useProxy")
+  @Parameter(defaultValue = "true", property = "dockerfile.useProxy")
   protected boolean useProxy;
 
   /**
