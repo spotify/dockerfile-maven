@@ -52,10 +52,39 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.settings.Proxy;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.util.StringUtils;
 
 public abstract class AbstractDockerMojo extends AbstractMojo {
+
+  /**
+   * JVM/System property name holding the hostname of the http proxy.
+   */
+  private static final String HTTP_PROXY_HOST = "http.proxyHost";
+
+  /**
+   * JVM/System property name holding the port of the http proxy.
+   */
+  private static final String HTTP_PROXY_PORT = "http.proxyPort";
+
+  /**
+   * JVM/System property name holding the list of hosts/patterns that
+   * should not use the proxy configuration.
+   */
+  private static final String HTTP_NON_PROXY_HOSTS = "http.nonProxyHosts";
+
+  /**
+   * JVM/System property name holding the username of the http proxy.
+   */
+  private static final String HTTP_PROXY_USER = "http.proxyUser";
+
+  /**
+   * JVM/System property name holding the password of the http proxy.
+   */
+  private static final String HTTP_PROXY_PASSWORD = "http.proxyPassword";
+
 
   protected enum Metadata {
     IMAGE_ID("image ID", "image-id"),
@@ -417,7 +446,9 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
   @Nonnull
   private DockerClient openDockerClient() throws MojoExecutionException {
     final RegistryAuthSupplier authSupplier = createRegistryAuthSupplier();
-
+    if (useProxy) {
+      configureProxyServerSettings();
+    }
     try {
       return DefaultDockerClient.fromEnv()
           .readTimeoutMillis(readTimeoutMillis)
@@ -427,6 +458,10 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
           .build();
     } catch (DockerCertificateException e) {
       throw new MojoExecutionException("Could not load Docker certificates", e);
+    } finally {
+      if (useProxy) {
+        restoreProxyServerSettings();
+      }
     }
   }
 
@@ -514,6 +549,74 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     }
 
     return ContainerRegistryAuthSupplier.forCredentials(credentials).build();
+  }
+
+  private String originalProxyHost = null;
+  private String originalProxyPort = null;
+  private String originalNonProxyHosts = null;
+  private String originalProxyUser = null;
+  private String originalProxyPassword = null;
+
+  protected void configureProxyServerSettings() throws MojoExecutionException {
+    originalProxyHost = System.getProperty(HTTP_PROXY_HOST);
+    originalProxyPort = System.getProperty(HTTP_PROXY_PORT);
+    originalNonProxyHosts = System.getProperty(HTTP_NON_PROXY_HOSTS);
+    originalProxyUser = System.getProperty(HTTP_PROXY_USER);
+    originalProxyPassword = System.getProperty(HTTP_PROXY_PASSWORD);
+    Proxy proxy = session.getSettings().getActiveProxy();
+    if (proxy != null) {
+      getLog().info("Using proxy server configured in maven.");
+      if (proxy.getHost() == null) {
+        throw new MojoExecutionException("Proxy in settings.xml has no host");
+      }
+      if (proxy.getHost() != null) {
+        System.setProperty(HTTP_PROXY_HOST, proxy.getHost());
+      }
+      if (String.valueOf(proxy.getPort()) != null) {
+        System.setProperty(HTTP_PROXY_PORT, String.valueOf(proxy.getPort()));
+      }
+      if (proxy.getNonProxyHosts() != null) {
+        System.setProperty(HTTP_NON_PROXY_HOSTS, proxy.getNonProxyHosts());
+      }
+      if (!StringUtils.isEmpty(proxy.getUsername())
+          && !StringUtils.isEmpty(proxy.getPassword())) {
+        System.setProperty(HTTP_PROXY_USER, proxy.getUsername());
+        System.setProperty(HTTP_PROXY_PASSWORD, proxy.getPassword());
+      }
+    }
+  }
+
+  private void restoreProxyServerSettings() {
+    if (originalProxyHost != null) {
+      System.setProperty(HTTP_PROXY_HOST, originalProxyHost);
+    } else {
+      System.getProperties().remove(HTTP_PROXY_HOST);
+    }
+    originalProxyHost = null;
+    if (originalProxyPort != null) {
+      System.setProperty(HTTP_PROXY_PORT, originalProxyPort);
+    } else {
+      System.getProperties().remove(HTTP_PROXY_PORT);
+    }
+    originalProxyPort = null;
+    if (originalNonProxyHosts != null) {
+      System.setProperty(HTTP_NON_PROXY_HOSTS, originalNonProxyHosts);
+    } else {
+      System.getProperties().remove(HTTP_NON_PROXY_HOSTS);
+    }
+    originalNonProxyHosts = null;
+    if (originalProxyUser != null) {
+      System.setProperty(HTTP_PROXY_USER, originalProxyUser);
+    } else {
+      System.getProperties().remove(HTTP_PROXY_USER);
+    }
+    originalProxyUser = null;
+    if (originalProxyPassword != null) {
+      System.setProperty(HTTP_PROXY_PASSWORD, originalProxyPassword);
+    } else {
+      System.getProperties().remove(HTTP_PROXY_PASSWORD);
+    }
+    originalProxyPassword = null;
   }
 
 }
