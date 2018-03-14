@@ -208,6 +208,17 @@ before running the plugin.
 
 [ADC]: https://developers.google.com/identity/protocols/application-default-credentials
 
+GCR users may need to initialize their Application Default Credentials via `gcloud`.
+Depending on where the plugin will run, they may wish to use [their Google
+identity][app-def-login] by running the following command
+
+    gcloud auth application-default login
+
+or [create a service account][service-acct] instead.
+
+[app-def-login]: https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login
+[service-acct]: https://cloud.google.com/docs/authentication/getting-started#creating_a_service_account
+
 ## Authenticating with maven settings.xml
 
 Since version 1.3.6, you can authenticate using your maven settings.xml instead
@@ -276,6 +287,15 @@ with this command line call
 
     mvn goal -Ddockerfile.username=... -Ddockerfile.password=...
     
+## Maven Goals
+
+Goals available for this plugin:
+
+| Goal      | Description    | Default Phase |
+| ---- | ---- | ---- |
+| `dockerfile:build` | Builds a Docker image from a Dockerfile. | `package` |
+| `dockerfile:tag` | Tags a Docker image. | `package` |
+| `dockerfile:push` | Pushes a Docker image to a repository. | `deploy` |
 
 ## Skip Docker Goals Bound to Maven Phases
 
