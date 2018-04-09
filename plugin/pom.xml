@@ -48,7 +48,7 @@
     <dependency>
       <groupId>com.spotify</groupId>
       <artifactId>dockerfile-maven-extension</artifactId>
-      <version>${project.version}</version>
+      <version>1.4.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
