@@ -92,6 +92,9 @@ public class BuildMojo extends AbstractDockerMojo {
   @Parameter(property = "dockerfile.buildArgs")
   private Map<String,String> buildArgs;
 
+  @Parameter(property = "dockerfile.buildParams")
+  private Map<String,String> buildParams;
+
   @Override
   public void execute(DockerClient dockerClient)
       throws MojoExecutionException, MojoFailureException {
@@ -104,7 +107,7 @@ public class BuildMojo extends AbstractDockerMojo {
 
     final String imageId = buildImage(
         dockerClient, log, verbose, contextDirectory, repository, tag, pullNewerImage, noCache,
-        buildArgs);
+        buildParams, buildArgs);
 
     if (imageId == null) {
       log.warn("Docker build was successful, but no image was built");
@@ -136,6 +139,7 @@ public class BuildMojo extends AbstractDockerMojo {
                            @Nonnull String tag,
                            boolean pullNewerImage,
                            boolean noCache,
+                           @Nullable Map<String,String> buildParams,
                            @Nullable Map<String,String> buildArgs)
       throws MojoExecutionException, MojoFailureException {
 
@@ -156,7 +160,11 @@ public class BuildMojo extends AbstractDockerMojo {
     if (noCache) {
       buildParameters.add(DockerClient.BuildParam.noCache());
     }
-
+    if (buildParams != null) {
+      for (Map.Entry<String,String> e: buildParams.entrySet()) {
+        buildParameters.add(DockerClient.BuildParam.create(e.getKey(),e.getValue()));
+      }
+    }
     if (buildArgs != null && !buildArgs.isEmpty()) {
       try {
         final String encodedBuildArgs = URLEncoder.encode(new Gson().toJson(buildArgs), "utf-8");
