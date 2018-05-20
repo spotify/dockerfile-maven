@@ -98,11 +98,11 @@
             <goals>
               <goal>build</goal>
             </goals>
-            <configuration>
-              <repository>spotify/dockerfile-advanced-backend</repository>
-            </configuration>
           </execution>
         </executions>
+        <configuration>
+          <repository>spotify/dockerfile-advanced-backend</repository>
+        </configuration>
       </plugin>
     </plugins>
   </build>
