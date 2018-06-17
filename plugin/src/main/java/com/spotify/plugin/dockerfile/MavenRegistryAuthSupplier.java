@@ -29,6 +29,7 @@ import com.spotify.docker.client.auth.RegistryAuthSupplier;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.messages.RegistryAuth;
 import com.spotify.docker.client.messages.RegistryConfigs;
+import com.spotify.plugin.dockerfile.kubernetes.KubernetesUtilities;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,6 +76,25 @@ public class MavenRegistryAuthSupplier implements RegistryAuthSupplier {
       } catch (PlexusCipherException | SecDispatcherException e) {
         throw new DockerException("Failed to decrypt Maven server password", e);
       }
+
+      if(KubernetesUtilities.OPENSHIFT_CLI_PASSWORD_KEYWORD.compareToIgnoreCase(password) == 0) {
+        log.debug("Looking up kubernetes token");
+        if(!KubernetesUtilities.hasOpenShift()) {
+          throw new DockerException("Maven server configuration specified \"" + KubernetesUtilities.OPENSHIFT_CLI_PASSWORD_KEYWORD + "\" keyword but could not find OpenShift control command: " + KubernetesUtilities.OPENSHIFT_CLI_BINARY_NAME);
+        }
+        String authenticationToken = KubernetesUtilities.getAuthenticationToken(server.getId());
+        if(authenticationToken != null) {
+          log.debug("Returning kubernetes token");
+          return RegistryAuth.builder()
+                  .username(server.getUsername())
+                  .password(authenticationToken)
+                  .build();
+
+        } else {
+          throw new DockerException("Maven server configuration specified \"" + KubernetesUtilities.OPENSHIFT_CLI_PASSWORD_KEYWORD + "\" keyword but no password was returned.");
+        }
+      }
+
       return RegistryAuth.builder()
         .username(server.getUsername())
         .password(password)
@@ -93,13 +113,33 @@ public class MavenRegistryAuthSupplier implements RegistryAuthSupplier {
   public RegistryConfigs authForBuild() throws DockerException {
     final Map<String, RegistryAuth> allConfigs = new HashMap<>();
     for (Server server : settings.getServers()) {
-      allConfigs.put(
-          server.getId(),
-          RegistryAuth.builder()
-            .username(server.getUsername())
-            .password(server.getPassword())
-            .build()
-      );
+      if(KubernetesUtilities.OPENSHIFT_CLI_PASSWORD_KEYWORD.compareToIgnoreCase(server.getPassword()) == 0) {
+        log.debug("Looking up kubernetes token");
+        if(!KubernetesUtilities.hasOpenShift()) {
+          throw new DockerException("Maven server configuration specified \"" + KubernetesUtilities.OPENSHIFT_CLI_PASSWORD_KEYWORD + "\" keyword but could not find OpenShift control command: " + KubernetesUtilities.OPENSHIFT_CLI_BINARY_NAME);
+        }
+        String authenticationToken = KubernetesUtilities.getAuthenticationToken(server.getId());
+        if(authenticationToken != null) {
+          log.debug("Returning kubernetes token");
+          allConfigs.put(
+                  server.getId(),
+                  RegistryAuth.builder()
+                          .username(server.getUsername())
+                          .password(authenticationToken)
+                          .build()
+          );
+        } else {
+          throw new DockerException("Maven server configuration specified \"" + KubernetesUtilities.OPENSHIFT_CLI_PASSWORD_KEYWORD + "\" keyword but no password was returned.");
+        }
+      } else {
+        allConfigs.put(
+                server.getId(),
+                RegistryAuth.builder()
+                        .username(server.getUsername())
+                        .password(server.getPassword())
+                        .build()
+        );
+      }
     }
     return RegistryConfigs.create(allConfigs);
   }
