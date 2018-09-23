@@ -4,12 +4,11 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.spotify/dockerfile-maven.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.spotify%22%20dockerfile-maven)
 [![License](https://img.shields.io/github/license/spotify/dockerfile-maven.svg)](LICENSE)
 
-This is a Maven plugin and extension which help to seamlessly
-integrate Docker with Maven.
+This is Maven plugin helps Maven integrate with Docker.
 
 The design goals are:
 
-  - Don't try to do anything fancy.  `Dockerfile`s are how you build
+  - Don't do anything fancy.  `Dockerfile`s are how you build
     Docker projects; that's what this plugin uses.  They are
     mandatory.
   - Make the Docker build process integrate with the Maven build
@@ -36,7 +35,7 @@ See the [changelog for a list of releases][changelog]
 
 ## Set-up
 
-This plugin requires Java 7 or later, and Apache Maven 3 or later.  To
+This plugin requires Java 7 or later and Apache Maven 3 or later.  To
 run the integration tests or to use the plugin in practice, a working
 Docker set-up is needed.
 
@@ -191,128 +190,10 @@ service-b:
 Now, `docker-compose up` and `docker-compose build` will work as
 expected.
 
-## Authentication and private Docker registry support
+## Usage
 
-Since version 1.3.0, the plugin will automatically use any configuration in
-your `~/.dockercfg` or `~/.docker/config.json` file when pulling, pushing, or
-building images to private registries.
+See [usage docs](usage.md).
 
-Additionally the plugin will enable support for Google Container Registry if it
-is able to successfully load [Google's "Application Default Credentials"][ADC].
-The plugin will also load Google credentials from the file pointed to by the
-environment variable `DOCKER_GOOGLE_CREDENTIALS` if it is defined. Since GCR
-authentication requires retrieving short-lived access codes for the given
-credentials, support for this registry is baked into the underlying
-docker-client rather than having to first populate the docker config file
-before running the plugin.
+## Authentication
 
-[ADC]: https://developers.google.com/identity/protocols/application-default-credentials
-
-GCR users may need to initialize their Application Default Credentials via `gcloud`.
-Depending on where the plugin will run, they may wish to use [their Google
-identity][app-def-login] by running the following command
-
-    gcloud auth application-default login
-
-or [create a service account][service-acct] instead.
-
-[app-def-login]: https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login
-[service-acct]: https://cloud.google.com/docs/authentication/getting-started#creating_a_service_account
-
-## Authenticating with maven settings.xml
-
-Since version 1.3.6, you can authenticate using your maven settings.xml instead
-of docker configuration.  Just add configuration similar to:
-
-```xml
-<configuration>
-  <repository>docker-repo.example.com:8080/organization/image</repository>
-  <tag>latest</tag>
-  <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-</configuration>
-```
-
-You can also use `-Ddockerfile.useMavenSettingsForAuth=true` on the command line.
-
-Then, in your maven settings file, add configuration for the server:
-
-```xml
-<servers>
-  <server>
-    <id>docker-repo.example.com:8080</id>
-    <username>me</username>
-    <password>mypassword</password>
-  </server>
-</servers>
-```
-
-exactly as you would for any other server configuration.
-
-Since version 1.4.3, using an encrypted password in the Maven settings file is supported.  For more
-information about encrypting server passwords in `settings.xml`, 
-[read the documentation here](https://maven.apache.org/guides/mini/guide-encryption.html).
-
-## Authenticating with maven pom.xml
-
-Since version 1.3.XX, you can authenticate using config from the pom itself.
-Just add configuration similar to:
-
-```xml
- <plugin>
-    <groupId>com.spotify</groupId>
-    <artifactId>dockerfile-maven-plugin</artifactId>
-    <version>${version}</version>
-    <configuration>
-        <username>repoUserName</username>
-        <password>repoPassword</password>
-        <repository>${docker.image.prefix}/${project.artifactId}</repository>
-        <buildArgs>
-            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
-        </buildArgs>
-    </configuration>
-</plugin>
-```
-or simpler, 
-```xml
- <plugin>
-    <groupId>com.spotify</groupId>
-    <artifactId>dockerfile-maven-plugin</artifactId>
-    <version>${version}</version>
-    <configuration>
-        <repository>${docker.image.prefix}/${project.artifactId}</repository>
-        <buildArgs>
-            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
-        </buildArgs>
-    </configuration>
-</plugin>
-```
-
-with this command line call
-
-    mvn goal -Ddockerfile.username=... -Ddockerfile.password=...
-    
-## Maven Goals
-
-Goals available for this plugin:
-
-| Goal      | Description    | Default Phase |
-| ---- | ---- | ---- |
-| `dockerfile:build` | Builds a Docker image from a Dockerfile. | `package` |
-| `dockerfile:tag` | Tags a Docker image. | `package` |
-| `dockerfile:push` | Pushes a Docker image to a repository. | `deploy` |
-
-## Skip Docker Goals Bound to Maven Phases
-
-You can pass options to maven to disable the docker goals.
-
-| Maven Option        | What Does _that thing_ Do?           |
-| ------------- |:-------------:|
-| dockerfile.skip | Disables the entire dockerfile plugin; all goals become no-ops. |
-| dockerfile.build.skip | Disables the build goal; it becomes a no-op. |
-| dockerfile.tag.skip | Disables the tag goal; it becomes a no-op. |
-| dockerfile.push.skip | Disables the push goal; it becomes a no-op. |
-
-For example to skip the entire dockerfile plugin:
-```
-mvn clean package -Ddockerfile.skip
-```
+See [authentication docs](authentication.md).
