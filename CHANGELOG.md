@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.6 (release TBD)
+
+- Support for Java 9 and 10
+
 ## 1.3.6 (released September 13 2017)
 
 - Add support for using maven settings.xml file to provide docker authorization ([65][])
