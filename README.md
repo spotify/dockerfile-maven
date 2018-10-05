@@ -48,7 +48,7 @@ full service consisting of two micro-services that are integration
 tested using `helios-testing`.
 
 This configures the actual plugin to build your image with `mvn
-package` and push it with `mvn deploy`.  Of course you can also say
+package` and push it with `mvn deploy`.  Ofcourse you can also say
 `mvn dockerfile:build` explicitly.
 
 ```xml
