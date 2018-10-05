@@ -20,90 +20,111 @@
 
 package com.spotify.it.frontend;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.describedAs;
+import static org.hamcrest.Matchers.is;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import com.google.common.net.HostAndPort;
-
-import com.spotify.helios.common.descriptors.HealthCheck;
-import com.spotify.helios.testing.HeliosDeploymentResource;
-import com.spotify.helios.testing.HeliosSoloDeployment;
-import com.spotify.helios.testing.TemporaryJob;
-import com.spotify.helios.testing.TemporaryJobs;
-
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.describedAs;
-import static org.hamcrest.Matchers.is;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.Network;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 public class MainIT {
+  private static final Logger log = LoggerFactory.getLogger(MainIT.class);
 
-  @ClassRule
-  public static final HeliosDeploymentResource HELIOS = new HeliosDeploymentResource(
-      HeliosSoloDeployment.fromEnv()
-          .checkForNewImages(true)
-          .removeHeliosSoloOnExit(true)
-          .build());
+  private static final int BACKEND_PORT = 1337;
+  private static final int FRONTEND_PORT = 1338;
+
+  /**
+   * Create a Network that both containers are attached to. When the containers are setup, they have
+   * .withNetworkAliases("foo") set, which allows the other container to refer to http://foo/ when
+   * one container needs to talk to another.
+   *
+   * This is needed because container.getContainerIpAddress() is only for use for a test
+   * to communicate with a container, not container-to-container communication -
+   * getContainerIpAddress() will return "localhost" typically
+   */
+  @Rule public final Network network = Network.newNetwork();
 
   @Rule
-  public final TemporaryJobs temporaryJobs = TemporaryJobs.builder()
-      .client(HELIOS.client())
-      .deployTimeoutMillis(TimeUnit.MINUTES.toMillis(1))
-      .build();
+  public final GenericContainer backendJob = createBackend(network);
+
+  @Rule
+  public final GenericContainer frontendJob = createFrontend(network);
+
+  private GenericContainer createBackend(final Network network) {
+    final String image;
+    try {
+      image = Resources.toString(
+          Resources.getResource("META-INF/docker/com.spotify.it/backend/image-name"),
+          Charsets.UTF_8).trim();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    final GenericContainer container = new GenericContainer(image)
+        .withExposedPorts(BACKEND_PORT)
+        .withNetwork(network)
+        .withNetworkAliases("backend")
+        .waitingFor(Wait.forHttp("/api/version"));
+
+    // start early, since frontend needs to know the port of backend
+    container.start();
+
+    return container;
+  }
+
+  private GenericContainer createFrontend(final Network network) {
+    final String image;
+    try {
+      image = Files.readFirstLine(new File("target/docker/image-name"), Charsets.UTF_8);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    return new GenericContainer(image)
+        .withExposedPorts(1338)
+        .withCommand("http://backend:" + BACKEND_PORT)
+        .withNetwork(network)
+        .withNetworkAliases("frontend");
+  }
 
   private URI frontend;
   private URI backend;
 
   @Before
-  public void setUp() throws Exception {
-    TemporaryJob backendJob = temporaryJobs.job()
-        .image(Resources.toString(
-            Resources.getResource("META-INF/docker/com.spotify.it/backend/image-name"),
-            Charsets.UTF_8).trim())
-        .port("http", 1337)
-        .healthCheck(HealthCheck.newHttpHealthCheck()
-            .setPath("/api/version")
-            .setPort("http")
-            .build()
-        )
-        .deploy();
-    HostAndPort backendAddress = backendJob.address("http");
-    backend = httpUri(backendAddress);
+  public void setUp() {
+    backend = httpUri(backendJob, BACKEND_PORT);
+    frontend = httpUri(frontendJob, FRONTEND_PORT);
 
-    TemporaryJob frontendJob = temporaryJobs.job()
-        .image(Files.readFirstLine(new File("target/docker/image-name"),
-                                   Charsets.UTF_8))
-        .command(backend.toString())
-        .port("http", 1338)
-        .healthCheck(HealthCheck.newHttpHealthCheck()
-            .setPath("/")
-            .setPort("http")
-            .build()
-        )
-        .deploy();
-    HostAndPort frontendAddress = frontendJob.address("http");
-    frontend = httpUri(frontendAddress);
+    backendJob.followOutput(new Slf4jLogConsumer(
+        LoggerFactory.getLogger(MainIT.class.getName() + ".backend")));
+
+    frontendJob.followOutput(new Slf4jLogConsumer(
+        LoggerFactory.getLogger(MainIT.class.getName() + ".frontend")));
   }
 
-  private URI httpUri(HostAndPort frontendAddress) {
-    return URI.create(
-        String.format("http://%s:%d", frontendAddress.getHostText(), frontendAddress.getPort()));
+  private URI httpUri(GenericContainer container, int portNumber) {
+    return URI.create("http://" + container.getContainerIpAddress()
+                      + ":" + container.getMappedPort(portNumber));
   }
 
   @Test
