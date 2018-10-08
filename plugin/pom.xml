@@ -67,6 +67,18 @@
       <artifactId>maven-archiver</artifactId>
       <version>3.0.0</version>
     </dependency>
+    
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-archiver</artifactId>
+      <version>3.1.1</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.18</version>
+    </dependency>
 
     <dependency>
       <groupId>org.sonatype.plexus</groupId>
