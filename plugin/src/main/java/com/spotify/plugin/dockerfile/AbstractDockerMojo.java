@@ -30,6 +30,7 @@ import com.spotify.docker.client.DockerConfigReader;
 import com.spotify.docker.client.auth.ConfigFileRegistryAuthSupplier;
 import com.spotify.docker.client.auth.MultiRegistryAuthSupplier;
 import com.spotify.docker.client.auth.RegistryAuthSupplier;
+import com.spotify.docker.client.auth.ecr.EcrAuthSupplier;
 import com.spotify.docker.client.auth.gcr.ContainerRegistryAuthSupplier;
 import com.spotify.docker.client.exceptions.DockerCertificateException;
 import java.io.File;
@@ -58,6 +59,15 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 public abstract class AbstractDockerMojo extends AbstractMojo {
 
+    @Parameter(defaultValue = "false", property = "dockerfile.awsEcrEnabled")
+    private boolean awsEcrEnabled;
+
+    @Parameter(property = "dockerfile.awsEcrRegistryId")
+    private String awsEcrRegistryId;
+
+    @Parameter(property = "dockerfile.awsEcrRegion")
+    private String awsEcrRegion;
+     
   protected enum Metadata {
     IMAGE_ID("image ID", "image-id"),
     REPOSITORY("repository", "repository"),
@@ -468,6 +478,13 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
       getLog().info("Google Container Registry support is disabled");
     }
 
+        if (awsEcrEnabled) {
+            final RegistryAuthSupplier awsEcrSupplier = awsEcrRegistryAuthSupplier();
+            suppliers.add(0, awsEcrSupplier);
+        } else {
+            getLog().info("AWS ECR Registry support is disabled");
+        }
+
     MavenPomAuthSupplier pomSupplier = new MavenPomAuthSupplier(this.username, this.password);
     if (pomSupplier.hasUserName()) {
       suppliers.add(pomSupplier);
@@ -521,6 +538,11 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     }
 
     return ContainerRegistryAuthSupplier.forCredentials(credentials).build();
+  }
+  
+  @Nullable
+  private RegistryAuthSupplier awsEcrRegistryAuthSupplier() {
+    return new EcrAuthSupplier(awsEcrRegistryId, awsEcrRegion);
   }
 
 }

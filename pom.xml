@@ -8,6 +8,7 @@
     <version>6</version>
   </parent>
 
+  <groupId>com.nyshex</groupId>
   <artifactId>dockerfile-maven</artifactId>
   <version>1.4.10-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -23,15 +24,31 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <checkstyle.skip>true</checkstyle.skip>
+    <enforcer.skip>true</enforcer.skip>
+    <gpg.skip>true</gpg.skip>
   </properties>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com/spotify/dockerfile-maven.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/spotify/dockerfile-maven.git</developerConnection>
+    <url>https://github.com/NYSHEX/dockerfile-maven</url>
+    <connection>scm:git:git://github.com:NYSHEX/dockerfile-maven.git</connection>
+    <developerConnection>scm:git:git@github.com:NYSHEX/dockerfile-maven.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/spotify/dockerfile-maven</url>
   </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>maven.nyshex.com-releases</name>
+            <url>https://maven.nyshex.com/artifactory/release</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>maven.nyshex.com-snapshots</name>
+            <url>https://maven.nyshex.com/artifactory/snapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
   <build>
     <pluginManagement>
       <plugins>
@@ -55,6 +72,15 @@
           <updateReleaseInfo>true</updateReleaseInfo>
         </configuration>
       </plugin>
+      <plugin>
+         <groupId>org.sonatype.plugins</groupId>
+         <artifactId>nexus-staging-maven-plugin</artifactId>
+         <version>1.6.3</version>
+         <extensions>true</extensions>
+         <configuration>
+             <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+         </configuration>
+       </plugin>
     </plugins>
   </build>
 

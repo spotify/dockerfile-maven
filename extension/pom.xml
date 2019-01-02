@@ -1,16 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <artifactId>dockerfile-maven</artifactId>
-    <groupId>com.spotify</groupId>
+    <parent>
+        <artifactId>dockerfile-maven</artifactId>
+        <groupId>com.nyshex</groupId>
+        <version>1.4.10-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>dockerfile-maven-extension</artifactId>
+
+    <properties>
+        <checkstyle.skip>true</checkstyle.skip>
+        <enforcer.skip>true</enforcer.skip>
+        <gpg.skip>true</gpg.skip>
+    </properties>
+
+    <name>Dockerfile Maven Extension</name>
+    <description>Adds support for docker-info dependencies in Maven</description>
     <version>1.4.10-SNAPSHOT</version>
-  </parent>
 
-  <artifactId>dockerfile-maven-extension</artifactId>
-
-  <name>Dockerfile Maven Extension</name>
-  <description>Adds support for docker-info dependencies in Maven</description>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

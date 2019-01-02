@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.spotify</groupId>
+    <groupId>com.nyshex</groupId>
     <artifactId>dockerfile-maven</artifactId>
     <version>1.4.10-SNAPSHOT</version>
   </parent>
@@ -14,9 +14,26 @@
   <name>Dockerfile Maven Plugin</name>
   <description>Adds support for building Dockerfiles in Maven</description>
 
-  <properties>
-    <docker-client.version>8.14.3</docker-client.version>
-  </properties>
+    <properties>
+        <docker-client.version>8.14.6</docker-client.version>
+        <checkstyle.skip>true</checkstyle.skip>
+        <enforcer.skip>true</enforcer.skip>
+        <gpg.skip>true</gpg.skip>
+        <invoker.skip>true</invoker.skip>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>maven.nyshex.com-releases</name>
+            <url>https://maven.nyshex.com/artifactory/release</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>maven.nyshex.com-snapshots</name>
+            <url>https://maven.nyshex.com/artifactory/snapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
 
   <dependencyManagement>
     <dependencies>
@@ -40,7 +57,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.spotify</groupId>
+      <groupId>com.nyshex</groupId>
       <artifactId>docker-client</artifactId>
       <classifier>shaded</classifier>
       <version>${docker-client.version}</version>
@@ -56,7 +73,7 @@
       <version>23.6.1-jre</version>
     </dependency>
     <dependency>
-      <groupId>com.spotify</groupId>
+      <groupId>com.nyshex</groupId>
       <artifactId>dockerfile-maven-extension</artifactId>
       <version>1.4.10-SNAPSHOT</version>
     </dependency>
@@ -153,7 +170,7 @@
         <version>1.9</version>
         <dependencies>
           <dependency>
-            <groupId>com.spotify</groupId>
+            <groupId>com.nyshex</groupId>
             <artifactId>docker-client</artifactId>
             <version>${docker-client.version}</version>
           </dependency>
@@ -183,6 +200,15 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+         <groupId>org.sonatype.plugins</groupId>
+         <artifactId>nexus-staging-maven-plugin</artifactId>
+         <version>1.6.3</version>
+         <extensions>true</extensions>
+         <configuration>
+             <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+         </configuration>
+       </plugin>
     </plugins>
   </build>
 </project>
