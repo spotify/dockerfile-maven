@@ -53,7 +53,7 @@ public class BuildMojo extends AbstractDockerMojo {
   /**
    * Regex for a valid docker repository name.  Used in validateRepository().
    */
-  private static final String VALID_REPO_REGEX = "^([a-z0-9_.-])+(\\/[a-z0-9_.-]+)*$";
+  private static final String VALID_REPO_REGEX = "^([a-z0-9_.:-])+(/[a-z0-9_.-]+)*$";
 
   /**
    * Directory containing the the build context. This is typically the directory that contains
