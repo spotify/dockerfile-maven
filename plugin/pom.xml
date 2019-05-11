@@ -15,7 +15,7 @@
   <description>Adds support for building Dockerfiles in Maven</description>
 
   <properties>
-    <docker-client.version>8.14.5</docker-client.version>
+    <docker-client.version>8.15.3</docker-client.version>
   </properties>
 
   <dependencyManagement>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>com.spotify</groupId>
       <artifactId>dockerfile-maven-extension</artifactId>
-      <version>1.4.11-SNAPSHOT</version>
+      <version>1.4.12-SNAPSHOT</version>
     </dependency>
 
     <dependency>
