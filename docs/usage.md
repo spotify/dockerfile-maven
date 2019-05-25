@@ -17,6 +17,7 @@ You can pass options to maven to disable the docker goals.
 | Maven Option  | What Does it Do?           | Default Value |
 | ------------- | -------------------------- | ------------- |
 | `dockerfile.skip` | Disables the entire dockerfile plugin; all goals become no-ops. | false |
+| `dockerfile.failedOnMissingDockerfile` | Failed maven build when there is no default Dockerfile in the project/module. | true |
 | `dockerfile.build.skip` | Disables the build goal; it becomes a no-op. | false |
 | `dockerfile.tag.skip` | Disables the tag goal; it becomes a no-op. | false |
 | `dockerfile.push.skip` | Disables the push goal; it becomes a no-op. | false |
