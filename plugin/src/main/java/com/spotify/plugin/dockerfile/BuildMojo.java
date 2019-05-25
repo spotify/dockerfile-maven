@@ -92,6 +92,12 @@ public class BuildMojo extends AbstractDockerMojo {
   private boolean skipBuild;
 
   /**
+   * Failed the build when Default docker file is not present in the context directory.
+   */
+  @Parameter(property = "dockerfile.build.failedOnMissingDockerfile", defaultValue = "true")
+  private boolean failedOnMissingDockerfile;
+
+  /**
    * Updates base images automatically.
    */
   @Parameter(property = "dockerfile.build.pullNewerImage", defaultValue = "true")
@@ -132,6 +138,24 @@ public class BuildMojo extends AbstractDockerMojo {
     if (dockerfile != null) {
       dockerfilePath = dockerfile.toPath();
     }
+
+    log.info("Path(dockerfile): " + dockerfilePath);
+    log.info("Path(contextDirectory): " + contextDirectory.toPath());
+
+    if (dockerfilePath == null
+            && !Files.exists(contextDirectory.toPath().resolve("Dockerfile"))
+            && !Files.exists(contextDirectory.toPath().resolve("dockerfile"))) {
+      // user did not override the default value
+      log.warn("Missing Dockerfile in context directory: " + contextDirectory.toPath());
+      if (failedOnMissingDockerfile) {
+        throw new MojoFailureException("Missing Dockerfile in context directory: "
+                + contextDirectory);
+      } else {
+        log.warn("docker-maven plugin execution is skipped for: " + contextDirectory.toPath());
+        return;
+      }
+    }
+
     final String imageId = buildImage(
         dockerClient, log, verbose, contextDirectory.toPath(), dockerfilePath, repository, tag, 
         pullNewerImage, noCache, buildArgs, cacheFrom, squash);
@@ -261,18 +285,6 @@ public class BuildMojo extends AbstractDockerMojo {
                                                  @Nonnull Path contextDirectory,
                                                  @Nullable Path dockerfile)
       throws MojoFailureException {
-
-    log.info("Path(dockerfile): " + dockerfile);
-    log.info("Path(contextDirectory): " + contextDirectory);
-
-    if (dockerfile == null
-            && !Files.exists(contextDirectory.resolve("Dockerfile"))
-            && !Files.exists(contextDirectory.resolve("dockerfile"))) {
-      // user did not override the default value
-      log.error("Missing Dockerfile in context directory: " + contextDirectory);
-      throw new MojoFailureException("Missing Dockerfile in context directory: "
-          + contextDirectory);
-    }
 
     if (dockerfile != null) {
       if (!Files.exists(dockerfile)) {

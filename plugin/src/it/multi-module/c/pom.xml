@@ -23,26 +23,40 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.spotify.it</groupId>
-  <artifactId>multi-module</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <parent>
+    <groupId>com.spotify.it</groupId>
+    <artifactId>multi-module</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
 
-  <description>This project has two modules that depend on each other.</description>
+  <artifactId>c</artifactId>
 
-  <modules>
-    <module>a</module>
-    <module>b</module>
-    <module>c</module>
-  </modules>
+  <description>The third module</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
   <build>
-    <extensions>
-      <extension>
+    <plugins>
+      <plugin>
         <groupId>@project.groupId@</groupId>
-        <artifactId>dockerfile-maven-extension</artifactId>
+        <artifactId>@project.artifactId@</artifactId>
         <version>@project.version@</version>
-      </extension>
-    </extensions>
+        <executions>
+          <execution>
+            <id>default</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <configuration>
+              <repository>test/multi-module-c</repository>
+              <tag>unstable</tag>
+              <failedOnMissingDockerfile>false</failedOnMissingDockerfile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>
