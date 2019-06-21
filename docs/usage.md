@@ -32,7 +32,8 @@ mvn clean package -Ddockerfile.skip
 
 | Maven Option  | What Does it Do?           | Required | Default Value |
 | ------------- | -------------------------- | -------- | ------------- |
-| `dockerfile.contextDirectory` | Directory containing the Dockerfile to build. | yes | none |
+| `dockerfile.contextDirectory` | Directory containing the Dockerfile to build. | no | ${project.basedir} |
+| `dockerfile.dockerfile` | File name of the Dockerfile (if not `Dockerfile`) | no | none |
 | `dockerfile.repository` | The repository to name the built image | no | none |
 | `dockerfile.tag` | The tag to apply when building the Dockerfile, which is appended to the repository. | no | latest |
 | `dockerfile.build.pullNewerImage` | Updates base images automatically. | no | true |
