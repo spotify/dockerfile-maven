@@ -1,5 +1,10 @@
 # Changelog
 
+## Upcoming release
+- Fix progress output when using cacheFrom ([269][])
+
+[269]: https://github.com/spotify/dockerfile-maven/pull/269
+
 ## 1.4.10 (released January 15 2019)
 - Add support for --squash experimental build option ([248][])
 - Add support for specifying a custom Dockerfile location ([89][])
