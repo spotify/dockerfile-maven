@@ -51,6 +51,9 @@ public class TestRepoNameValidation {
     // you're allowed only one slash, somewhere in the middle.
     assertTrue("Multipart", BuildMojo.validateRepository("with/forwardslash"));
     assertTrue("Multi-multipart", BuildMojo.validateRepository("with/multiple/forwardslash"));
+    // Local repositories can run on arbitrary ports
+    assertTrue("Port number without slash", BuildMojo.validateRepository("example.com:8080"));
+    assertTrue("Port number with slash", BuildMojo.validateRepository("example.com:8080/myrepo"));
   }
 
   @Test
