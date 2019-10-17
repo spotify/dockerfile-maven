@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.execution.MavenSession;
@@ -146,6 +148,13 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
 
   @Parameter(property = "dockerfile.password")
   protected String password;
+
+  /**
+   * URI used for executing docker commands. For example "http://localhost:2375"
+   * If this is set, the DOCKER_HOST environment variable will be ignored.
+   */
+  @Parameter(property = "dockerfile.dockerHostUri")
+  protected String dockerHostUri;
 
   /**
    * Whether to output a verbose log when performing various operations.
@@ -435,12 +444,15 @@ public abstract class AbstractDockerMojo extends AbstractMojo {
     final RegistryAuthSupplier authSupplier = createRegistryAuthSupplier();
 
     try {
-      return DefaultDockerClient.fromEnv()
-          .readTimeoutMillis(readTimeoutMillis)
-          .connectTimeoutMillis(connectTimeoutMillis)
-          .registryAuthSupplier(authSupplier)
-          .useProxy(useProxy)
-          .build();
+      DefaultDockerClient.Builder builder = DefaultDockerClient.fromEnv();
+      if (StringUtils.isNotEmpty(dockerHostUri)) {
+        builder.uri(dockerHostUri);
+      }
+      return builder.readTimeoutMillis(readTimeoutMillis)
+              .connectTimeoutMillis(connectTimeoutMillis)
+              .registryAuthSupplier(authSupplier)
+              .useProxy(useProxy)
+              .build();
     } catch (DockerCertificateException e) {
       throw new MojoExecutionException("Could not load Docker certificates", e);
     }
