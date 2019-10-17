@@ -28,3 +28,6 @@ assert tagFile.text == "unstable\n"
 
 File imageNameFile = new File(basedir, "b/target/docker-info-deps/META-INF/docker/com.spotify.it/a/image-name")
 assert imageNameFile.text == "test/multi-module-a:unstable\n"
+
+String buildLog = new File("${basedir}/build.log").getText("UTF-8")
+assert buildLog.contains("docker-maven plugin execution is skipped for:")

@@ -35,6 +35,7 @@ mvn clean package -Ddockerfile.skip
 | `dockerfile.contextDirectory` | Directory containing the Dockerfile to build. | yes | none |
 | `dockerfile.repository` | The repository to name the built image | no | none |
 | `dockerfile.tag` | The tag to apply when building the Dockerfile, which is appended to the repository. | no | latest |
+| `dockerfile.failedOnMissingDockerfile` | Failed maven build when there is no default Dockerfile in the project/module. | no | true
 | `dockerfile.build.pullNewerImage` | Updates base images automatically. | no | true |
 | `dockerfile.build.noCache` | Do not use cache when building the image. | no | false |
 | `dockerfile.build.cacheFrom` | Docker image used as cache-from. Pulled in advance if not exist locally or `pullNewerImage` is `false` | no | none |
