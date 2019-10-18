@@ -42,7 +42,7 @@ public class TagMojo extends AbstractDockerMojo {
    * The repository to put the built image into, for example <tt>spotify/foo</tt>.  You should also
    * set the <tt>tag</tt> parameter, otherwise the tag <tt>latest</tt> is used by default.
    */
-  @Parameter(property = "dockerfile.repository", required = true)
+  @Parameter(property = "dockerfile.repository", required = false)
   private String repository;
 
   /**
