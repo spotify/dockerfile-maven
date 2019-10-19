@@ -62,6 +62,24 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>@project.groupId@</groupId>
+        <artifactId>@project.artifactId@</artifactId>
+        <version>@project.version@</version>
+        <executions>
+          <execution>
+            <id>default</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <configuration>
+              <repository>test/multi-module-b</repository>
+              <tag>unstable</tag>
+              <pullNewerImage>false</pullNewerImage>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
