@@ -27,10 +27,13 @@ import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.exceptions.ImageNotFoundException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +117,12 @@ public class BuildMojo extends AbstractDockerMojo {
 
   @Parameter(property = "dockerfile.build.squash", defaultValue = "false")
   private boolean squash;
+  
+  /** 
+   * File path to save image as a tar archive after it is built. 
+   */
+  @Parameter(property = "dockerfile.build.saveImageToTarArchive")
+  private String saveImageToTarArchive;
 
   @Override
   public void execute(DockerClient dockerClient)
@@ -149,7 +158,24 @@ public class BuildMojo extends AbstractDockerMojo {
     }
 
     writeMetadata(log);
-
+    
+    if (saveImageToTarArchive != null && imageId != null) {
+      try {
+        log.info(MessageFormat.format("Image will be saved as a file {0}", 
+            Paths.get(saveImageToTarArchive).toString()));
+        final InputStream is = dockerClient.save(imageId);
+        java.nio.file.Files.copy(is, Paths.get(saveImageToTarArchive),
+            StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException e) {
+        log.warn("IOException thrown while trying to write the image archive.");
+      } catch (DockerException e) {
+        log.warn("Docker threw an exception while trying to write the image archive: "
+            + e.getMessage());
+      } catch (InterruptedException e) {
+        log.warn("InterruptedException thrown while trying to write the image archive.");
+      }
+    }
+    
     if (repository == null) {
       log.info(MessageFormat.format("Successfully built {0}", imageId));
     } else {
@@ -220,7 +246,7 @@ public class BuildMojo extends AbstractDockerMojo {
     if (squash) {
       buildParameters.add(new DockerClient.BuildParam("squash", encodeBuildParam(squash)));
     }
-
+    
     final DockerClient.BuildParam[] buildParametersArray =
         buildParameters.toArray(new DockerClient.BuildParam[buildParameters.size()]);
 
