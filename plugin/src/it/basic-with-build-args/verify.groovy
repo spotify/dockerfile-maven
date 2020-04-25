@@ -26,3 +26,5 @@ DefaultDockerClient dockerClient = DefaultDockerClient.fromEnv().build()
 imageInfo = dockerClient.inspectImage(imageId)
 
 assert imageInfo.config().labels().get("version") == "0.0.1"
+assert imageInfo.config().labels().get("arg_with_space") == "arg with space"
+assert imageInfo.config().labels().get("arg_with_plus") == "arg+with+plus"

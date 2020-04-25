@@ -50,6 +50,8 @@
         <configuration>
           <buildArgs>
             <IMAGE_VERSION>0.0.1</IMAGE_VERSION>
+            <ARG_WITH_SPACE>arg with space</ARG_WITH_SPACE>
+            <ARG_WITH_PLUS>arg+with+plus</ARG_WITH_PLUS>
           </buildArgs>
         </configuration>
       </plugin>
