@@ -1,9 +1,0 @@
-<!--
-  Contains the encrypted master password used to encrypt/decrypt server passwords in the
-  Maven settings.xml file.
-
-  See https://maven.apache.org/guides/mini/guide-encryption.html for more details.
--->
-<settingsSecurity>
-  <master>{fPB6uDF2BxcH5tT+mSXLWpd1tNw+TABncl/cf+uQQbw=}</master>
-</settingsSecurity>
