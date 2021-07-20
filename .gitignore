@@ -1,6 +1,0 @@
-.*
-!.git*
-!.travis.yml
-target/
-pom.xml.releaseBackup
-release.properties
