@@ -1,8 +1,0 @@
----
-  dataSource: "prs"
-  prefix: ""
-  ignoreLabels: []
-  ignoreIssuesWith: []
-  onlyMilestones: false
-  groupBy: false
-  changelogFilename: "CHANGELOG.md"
