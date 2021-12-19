@@ -212,7 +212,7 @@ public class BuildMojo extends AbstractDockerMojo {
         }
       }
       if (!cacheFromExistLocally.isEmpty()) {
-        buildParameters.add(new DockerClient.BuildParam("cache-from",
+        buildParameters.add(new DockerClient.BuildParam("cachefrom",
                 encodeBuildParam(cacheFromExistLocally)));
       }
     }
