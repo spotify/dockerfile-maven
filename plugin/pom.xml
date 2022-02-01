@@ -15,7 +15,7 @@
   <description>Adds support for building Dockerfiles in Maven</description>
 
   <properties>
-    <docker-client.version>8.16.0</docker-client.version>
+    <docker-client.version>1-PR-1221-a6274123d024c5d7ae6f89185a6a0f68dae55367-SNAPSHOT</docker-client.version>
   </properties>
 
   <dependencyManagement>
